@@ -91,25 +91,23 @@ def gerar_dataset_flexivel(num_linhas, num_colunas, nome_arquivo):
     print(f"   ⏱️  Tempo: {fim - inicio:.2f} segundos")
 
 if __name__ == "__main__":
-    # Vamos criar 3 cenários diferentes para brincar no benchmark!
+    print("🚀 INICIANDO A FÁBRICA DE DADOS PARA O SERVIDOR...")
     
-    # Cenário 1: Arquivo Padrão (1 Milhão de linhas, 10 colunas base)
-    gerar_dataset_flexivel(
-        num_linhas=1_000_000, 
-        num_colunas=10, 
-        nome_arquivo="dataset_1M_padrao.csv"
-    )
+    # === NÍVEL 1: PEQUENOS (API Latency) ===
+    gerar_dataset_flexivel(100_000, 10, "1_pequeno_padrao.csv")
+    gerar_dataset_flexivel(20_000, 100, "1_pequeno_largo.csv")
     
-    # Cenário 2: Arquivo "Largo" (100 mil linhas, mas 50 colunas - 5 ciclos!)
-    gerar_dataset_flexivel(
-        num_linhas=100_000, 
-        num_colunas=50, 
-        nome_arquivo="dataset_100k_largo.csv"
-    )
+    # === NÍVEL 2: MÉDIOS (Daily Batch) ===
+    gerar_dataset_flexivel(1_000_000, 10, "2_medio_alto.csv")
+    gerar_dataset_flexivel(200_000, 150, "2_medio_largo.csv")
     
-    # Cenário 3: O seu exemplo (25 colunas)
-    gerar_dataset_flexivel(
-        num_linhas=500_000, 
-        num_colunas=25, 
-        nome_arquivo="dataset_500k_25cols.csv"
-    )
+    # === NÍVEL 3: GRANDES (Stress Test) ===
+    gerar_dataset_flexivel(10_000_000, 10, "3_grande_alto.csv")
+    gerar_dataset_flexivel(1_000_000, 200, "3_grande_largo.csv")
+    
+    # === NÍVEL 4: GIGANTES (Big Data / Dask Territory) ===
+    # Se o seu servidor tiver menos de 16GB de RAM, gere apenas o primeiro Titã.
+    gerar_dataset_flexivel(25_000_000, 10, "4_gigante_alto.csv")
+    gerar_dataset_flexivel(5_000_000, 150, "4_gigante_titan.csv")
+
+    print("\n🏁 GERAÇÃO CONCLUÍDA! Prepare-se para o Benchmark.")
