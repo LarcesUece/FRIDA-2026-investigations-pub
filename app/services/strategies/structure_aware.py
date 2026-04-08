@@ -23,19 +23,15 @@ class StructureAwareMasking(MaskingStrategy):
         p, q = self.p, self.q
         col = col.cast(pl.Utf8)
         n = col.str.len_chars()
-        mask_len = (n - p - q)
-
-
+        mask_len = pl.when(n > (p + q)).then(n - p - q).otherwise(0)
         prefix = col.str.slice(0, p)
         mask = pl.lit("*").repeat_by(mask_len).list.join("")
-        suffix = pl.when(q > 0).then(col.str.slice(-q)).otherwise(pl.lit(""))
+        suffix = pl.when((q > 0) & (n >= q)).then(col.str.slice(-q)).otherwise(pl.lit(""))
 
         return (
-            pl.when(n > p + q)
+            pl.when(n > (p + q))
             .then(pl.concat_str([prefix, mask, suffix]))
-            .otherwise(col)
-            .cast(pl.Utf8)
+            .otherwise(col) 
         )
-    
 
     

@@ -11,7 +11,8 @@ WORK_FILE = "app/data/tmp_test.csv"
 
 COLUMNS = [
     "Address",
-    "Email",
+    "ID",
+    "Name",
 ]
 
 RUNS = 3
@@ -39,7 +40,7 @@ def build_configs(method: str):
                 MaskingConfig(
                     column_name=col,
                     method="structure_aware",
-                    params={"p": 2, "q": 2}
+                    params={"p": 3, "q": 3}
                 )
             )
 

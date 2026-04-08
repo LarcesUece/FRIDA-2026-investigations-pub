@@ -70,6 +70,7 @@ class AnonymizationService:
 
     def _apply_masking(self, lf: pl.LazyFrame, configs: list[MaskingConfig]) -> pl.LazyFrame:
         available_columns = lf.collect_schema().names()
+        expressions = []
         skipped = []
 
         for config in configs:
@@ -80,19 +81,14 @@ class AnonymizationService:
             strategy_cls = MaskingRegistry.get(config.method)
             strategy: MaskingStrategy = strategy_cls(**config.params)
 
-            expressions = []
-
-            for config in configs:
-                expressions.append(
-                    strategy.apply_expr(pl.col(config.column_name)).alias(config.column_name)
-                )
-
-            lf = lf.with_columns(expressions)
+            expressions.append(
+                strategy.apply_expr(pl.col(config.column_name)).alias(config.column_name)
+            )
 
         if skipped:
             raise ValueError(f"Columns not found: {skipped}")
 
-        return lf
+        return lf.with_columns(expressions)
 
 
     def _generate_output_path(self, input_path: str) -> str:
