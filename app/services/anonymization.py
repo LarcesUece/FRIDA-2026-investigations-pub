@@ -1,11 +1,12 @@
 import polars as pl
 import anyio
-
+import logging
 #from app.core.exceptions import DatasetValidationException
-from app.services.strategies.base import MaskingRegistry
+from app.services.strategies.base import MaskingRegistry, MaskingStrategy
 from app.schemas.anonymization import MaskingConfig
 from app.services.strategies import proportional, structure_aware
 
+logger = logging.getLogger(__name__)
 
 class AnonymizationService:
 
@@ -47,7 +48,7 @@ class AnonymizationService:
 
         if not dataset.file_path:
             #raise DatasetValidationException("Dataset has no file.")
-            raise KeyError
+            raise ValueError
 
         output_path = self._generate_output_path(dataset.file_path)
 
@@ -60,35 +61,36 @@ class AnonymizationService:
 
         return {"output_path": output_path}
 
-
     #streaming with polars
 
-    def _process_csv_streaming(self, input_path, output_path, configs):
-
-        lf = pl.scan_csv(input_path)
-
+    def _process_csv_streaming(self, input_path: str, output_path: str, configs: list[MaskingConfig]):
+        lf = pl.scan_csv(input_path, infer_schema=False)
         lf = self._apply_masking(lf, configs)
-
         lf.sink_csv(output_path)
 
-
-    def _apply_masking(self, lf: pl.LazyFrame, configs):
+    def _apply_masking(self, lf: pl.LazyFrame, configs: list[MaskingConfig]) -> pl.LazyFrame:
+        available_columns = lf.collect_schema().names()
+        skipped = []
 
         for config in configs:
-            strategy_cls = MaskingRegistry.get(config.method)
-            strategy = strategy_cls(**config.params)
-
-            if config.column_name not in lf.columns:
+            if config.column_name not in available_columns:
+                skipped.append(config.column_name)
                 continue
 
-            lf = lf.with_columns(
-                pl.col(config.column_name)
-                .cast(pl.Utf8)
-                .map_elements(
-                    lambda x: strategy.apply(x) if x is not None else x
+            strategy_cls = MaskingRegistry.get(config.method)
+            strategy: MaskingStrategy = strategy_cls(**config.params)
+
+            expressions = []
+
+            for config in configs:
+                expressions.append(
+                    strategy.apply_expr(pl.col(config.column_name)).alias(config.column_name)
                 )
-                .alias(config.column_name)
-            )
+
+            lf = lf.with_columns(expressions)
+
+        if skipped:
+            raise ValueError(f"Columns not found: {skipped}")
 
         return lf
 

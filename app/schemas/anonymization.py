@@ -1,6 +1,10 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Any
 
+class MaskingConfig(BaseModel):
+    column_name: str
+    method: str
+    params: dict[str, Any] = Field(default_factory=dict)
 
 class ProportionalColumn(BaseModel):
     column_name: str
@@ -19,10 +23,3 @@ class StructureAwareColumn(BaseModel):
 
 class StructureAwareRequest(BaseModel):
     columns: List[StructureAwareColumn]
-
-
-class MaskingConfig:
-    def __init__(self, column_name: str, method: str, params: dict):
-        self.column_name = column_name
-        self.method = method
-        self.params = params
