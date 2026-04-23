@@ -1,0 +1,15 @@
+.page {
+  min-height: 100vh;
+  padding: 42px 28px;
+  background: #f4f4f4;
+}
+
+.pageContent {
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 22px 14px;
+  }
+}
