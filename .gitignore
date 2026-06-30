@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+
+# Virtual Environments
+.env
+.venv
+venv/
+env/
+ENV/
+
+# Environment variables
+.env.*
+!.env.example
+
+# FastAPI/Guvicorn/Uvicorn
+*.log
+logs/
+gunicorn.conf.py
+
+# Testing
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+.cache/
+
+# Lint
+.mypy_cache/
+.pyright/
+.ruff_cache/
+
+# IDE/Editor
+.vscode/
+.idea/
+*.tmp
+*.swp
+
+# Static files
+static/
